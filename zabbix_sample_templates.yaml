@@ -1,0 +1,231 @@
+zabbix_export:
+  version: '5.4'
+  date: '2022-01-06T13:20:17Z'
+  groups:
+    -
+      uuid: 36bff6c29af64692839d077febfc7079
+      name: 'Templates/Network devices'
+  templates:
+    -
+      uuid: 7882f90bbc014ccdad64b00b066ffc62
+      template: 'Netgear Unmanaged Plus Switch'
+      name: 'Netgear Unmanaged Plus Switch'
+      groups:
+        -
+          name: 'Templates/Network devices'
+      items:
+        -
+          uuid: 8ba0aa9f63c1447fa9aa81260b08ea45
+          name: Hostname
+          type: DEPENDENT
+          key: zabbix-netgear-agent.hostname
+          delay: '0'
+          history: 14d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.hostname
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          master_item:
+            key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+        -
+          uuid: 8d9f40e744414ac2a847fcb9d2578c52
+          name: Location
+          type: DEPENDENT
+          key: zabbix-netgear-agent.location
+          delay: '0'
+          history: 14d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: LOCATION
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.location
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          master_item:
+            key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+        -
+          uuid: 374bf6e57b8e47deb5fb9b1fe5bda76a
+          name: Model
+          type: DEPENDENT
+          key: zabbix-netgear-agent.model
+          delay: '0'
+          history: 14d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: MODEL
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.model
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1h
+          master_item:
+            key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+        -
+          uuid: f7383c5742bb4ce0916c598a385ccaad
+          name: Status
+          type: DEPENDENT
+          key: zabbix-netgear-agent.status
+          delay: '0'
+          history: 14d
+          trends: 90d
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.status
+          master_item:
+            key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+        -
+          uuid: 7d77789fb0a44e269b1f0294c6e035d6
+          name: 'Agent Result'
+          type: EXTERNAL
+          key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+          history: 1h
+          trends: '0'
+          value_type: CHAR
+          triggers:
+            -
+              uuid: 4418c6a2d64c485ab5507a601963cbe8
+              expression: 'left(last(/Netgear Unmanaged Plus Switch/zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]),1)<>"{"'
+              name: 'Unavailable by agent'
+              priority: AVERAGE
+              manual_close: 'YES'
+      discovery_rules:
+        -
+          uuid: a3f13a6214094ec3b8d7194628ec1101
+          name: 'Network interfaces discovery'
+          type: EXTERNAL
+          key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,discoverif]'
+          delay: 1h
+          item_prototypes:
+            -
+              uuid: 68a4576845b3452ea6595954b8ffcac8
+              name: 'Interface #{#PORT}: Packets with errors'
+              type: DEPENDENT
+              key: 'zabbix-netgear-agent.interface.error[{#PATH}]'
+              delay: '0'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.{#PATH}.error'
+                -
+                  type: SIMPLE_CHANGE
+                  parameters:
+                    - ''
+              master_item:
+                key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Interface #{#PORT}'
+            -
+              uuid: 6473b46e8ae24f46b4fd9c25893e07a9
+              name: 'Interface #{#PORT}: Bits received'
+              type: DEPENDENT
+              key: 'zabbix-netgear-agent.interface.recv[{#PATH}]'
+              delay: '0'
+              units: bps
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.{#PATH}.recv'
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Interface #{#PORT}'
+            -
+              uuid: 11dee24765924d4b8cfe716204bd6ace
+              name: 'Interface #{#PORT}: Bits sent'
+              type: DEPENDENT
+              key: 'zabbix-netgear-agent.interface.sent[{#PATH}]'
+              delay: '0'
+              units: bps
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.{#PATH}.sent'
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              master_item:
+                key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Interface #{#PORT}'
+            -
+              uuid: 9cec082bf0a54624babd446bf7129dce
+              name: 'Interface #{#PORT}: Speed'
+              type: DEPENDENT
+              key: 'zabbix-netgear-agent.interface.speed[{#PATH}]'
+              delay: '0'
+              valuemap:
+                name: 'Interface Speed'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$.{#PATH}.speed'
+              master_item:
+                key: 'zabbix-netgear-agent[-host,{HOST.CONN},-mode,get]'
+              tags:
+                -
+                  tag: Application
+                  value: 'Interface #{#PORT}'
+      valuemaps:
+        -
+          uuid: 8990f849d7394cbeb6611c0c1a0a7b46
+          name: 'Interface Speed'
+          mappings:
+            -
+              value: '0'
+              newvalue: '0'
+            -
+              value: '1'
+              newvalue: '10 Mbps'
+            -
+              value: '2'
+              newvalue: '10 Mbps'
+            -
+              value: '3'
+              newvalue: '100 Mbps'
+            -
+              value: '4'
+              newvalue: '100 Mbps'
+            -
+              value: '5'
+              newvalue: '1 Gbps'
